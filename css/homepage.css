@@ -3,3 +3,9 @@
   margin: 10px;
   max-width: 500px;
 }
+
+ul.no-bullets {
+  list-style-type: none;
+  margin: 5;
+  padding: 5;
+}

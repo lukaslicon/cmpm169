@@ -25,6 +25,13 @@ class MyClass {
     }
 }
 
+
+var count = 0;
+var tileCountX = 6;
+var tileCountY = 6;
+
+var drawMode = 1;
+
 // setup() function is called once when the program starts
 function setup() {
     // place our canvas, making it fit our container
@@ -41,25 +48,89 @@ function setup() {
 
     var centerHorz = windowWidth / 2;
     var centerVert = windowHeight / 2;
+    
 }
+// inspiration/template https://editor.p5js.org/generative-design/sketches/P_2_1_3_04
 
-// draw() function is called repeatedly, it's the main animation loop
 function draw() {
-    background(220);    
-    // call a method on the instance
-    myInstance.myMethod();
+  clear();
+  noFill();
 
-    // Put drawings here
-    var centerHorz = canvasContainer.width() / 2 - 125;
-    var centerVert = canvasContainer.height() / 2 - 125;
-    fill(234, 31, 81);
-    noStroke();
-    rect(centerHorz, centerVert, 250, 250);
-    fill(255);
-    textStyle(BOLD);
-    textSize(140);
-    text("p5*", centerHorz + 10, centerVert + 200);
+  count = mouseX / 10 + 10;
+  var para = mouseY / height;
+
+  var tileWidth = width / tileCountX;
+  var tileHeight = height / tileCountY;
+
+  for (var gridY = 0; gridY <= tileCountY; gridY++) {
+    for (var gridX = 0; gridX <= tileCountX; gridX++) {
+
+      var posX = tileWidth * gridX + tileWidth / 2;
+      var posY = tileHeight * gridY + tileHeight / 2;
+
+      push();
+      translate(posX, posY);
+
+      // switch between modules
+      switch (drawMode) {
+        case 1:
+          stroke(0);
+          for (var i = 0; i < count; i++) {
+            triangle(-tileWidth / 2, tileHeight / 2, tileWidth / 2, tileHeight / 2, 0, -tileHeight / 2);
+            scale(1 - 3 / count);
+            rotate(para * 0.1);
+          }
+          break;
+        case 2:
+          noStroke();
+          for (var i = 0; i < count; i++) {
+            var gradient = lerpColor(color(0, 0), color(166, 141, 5), i / count);
+            fill(gradient, i / count * 200);
+            rotate(PI / 3); // 60 degrees in radians (QUARTER_PI)
+            triangle(-tileWidth / 2, tileHeight / 2, tileWidth / 2, tileHeight / 2, 0, -tileHeight / 2);
+            scale(1 - 3 / count);
+            rotate(para * 1.5);
+          }
+          break;
+        case 3:
+          noStroke();
+          for (var i = 0; i < count; i++) {
+            var gradient = lerpColor(color(0, 130, 164), color(255), i / count);
+            fill(gradient, 170);
+
+            push();
+            translate(4 * i, 0);
+            triangle(-tileWidth / 8, tileHeight / 8, tileWidth / 8, tileHeight / 8, 0, -tileHeight / 4);
+            pop();
+
+            push();
+            translate(-4 * i, 0);
+            triangle(-tileWidth / 8, tileHeight / 8, tileWidth / 8, tileHeight / 8, 0, -tileHeight / 4);
+            pop();
+
+            scale(1 - 1.5 / count);
+            rotate(para * 1.5);
+          }
+          break;
+      }
+
+      pop();
+
+    }
+  }
 }
+
+function keyReleased() {
+  if (key == 's' || key == 'S') saveCanvas(gd.timestamp(), 'png');
+  if (key == '1') drawMode = 1;
+  if (key == '2') drawMode = 2;
+  if (key == '3') drawMode = 3;
+  if (keyCode == DOWN_ARROW) tileCountY = max(tileCountY - 1, 1);
+  if (keyCode == UP_ARROW) tileCountY += 1;
+  if (keyCode == LEFT_ARROW) tileCountX = max(tileCountX - 1, 1);
+  if (keyCode == RIGHT_ARROW) tileCountX += 1;
+}
+
 
 // mousePressed() function is called once after every time a mouse button is pressed
 function mousePressed() {
