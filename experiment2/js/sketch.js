@@ -88,7 +88,7 @@ function setup() {
       this.position = createVector(x, y);
       this.velocity = createVector(random(-2, 2), random(-2, 2));
       this.acceleration = createVector(0, 0);
-      this.maxSpeed = 20;
+      this.maxSpeed = 15;
       this.size = 15;
       this.perceptionRadius = 50;
       this.trail = [];
