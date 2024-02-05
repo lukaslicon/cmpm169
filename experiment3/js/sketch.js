@@ -13,6 +13,8 @@ const VALUE2 = 2;
 // Globals
 let myInstance;
 let canvasContainer;
+let sound;
+let isSoundPlaying = false;
 
 class MyClass {
     constructor(param1, param2) {
@@ -24,6 +26,10 @@ class MyClass {
         // code to run when method is called
     }
 }
+function preload() {
+    sound = loadSound('../music/Undertale-Megalovania-Song-Sound-Effect.mp3'); // Update path to your sound file
+}
+
 
 // setup() function is called once when the program starts
 function setup() {
@@ -38,30 +44,50 @@ function setup() {
     });
     // create an instance of the class
     myInstance = new MyClass(VALUE1, VALUE2);
+    fft = new p5.FFT();
 
-    var centerHorz = windowWidth / 2;
-    var centerVert = windowHeight / 2;
 }
 
 // draw() function is called repeatedly, it's the main animation loop
 function draw() {
-    background(220);    
-    // call a method on the instance
-    myInstance.myMethod();
+    background(0);
 
-    // Put drawings here
-    var centerHorz = canvasContainer.width() / 2 - 125;
-    var centerVert = canvasContainer.height() / 2 - 125;
-    fill(234, 31, 81);
+    let spectrum = fft.analyze();
     noStroke();
-    rect(centerHorz, centerVert, 250, 250);
     fill(255);
-    textStyle(BOLD);
-    textSize(140);
-    text("p5*", centerHorz + 10, centerVert + 200);
+
+    for (let i = 0; i < spectrum.length; i++) {
+        let x = map(i, 0, spectrum.length, 0, canvas.width); // Use canvas.width instead of canvas.width / spectrum.length
+        let h = -canvas.height + map(spectrum[i], 0, 255, canvas.height, 0);
+        rect(x, canvas.height, canvas.width / spectrum.length, h);
+    }
 }
 
 // mousePressed() function is called once after every time a mouse button is pressed
-function mousePressed() {
-    // code to run when mouse is pressed
+
+function toggleSound() {
+    if (isSoundPlaying) {
+        sound.pause();
+    } else {
+        sound.loop();
+    }
+    isSoundPlaying = !isSoundPlaying;
+}
+
+function loadCustomSound() {
+    let fileInput = document.getElementById('fileInput');
+    let file = fileInput.files[0];
+
+    if (file) {
+        sound.stop(); // Stop the current sound if it's playing
+
+        // Load the new sound file
+        sound = loadSound(URL.createObjectURL(file));
+        isSoundPlaying = false; // Reset the play state
+    }
+}
+
+function uploadButtonClick() {
+    let fileInput = document.getElementById('fileInput');
+    fileInput.click(); // Trigger the click event on the file input
 }
