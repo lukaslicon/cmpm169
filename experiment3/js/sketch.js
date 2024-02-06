@@ -28,7 +28,7 @@ class MyClass {
     }
 }
 function preload() {
-    sound = loadSound('../music/Undertale-Megalovania-Song-Sound-Effect.mp3'); // Update path to your sound file
+    sound = loadSound('../music/Teddy-Swims-Lose-Control.mp3'); // Update path to your sound file
 }
 
 function toggleSound() {
@@ -75,31 +75,41 @@ function setup() {
     fft = new p5.FFT();
 
 }
-
-// draw() function is called repeatedly, it's the main animation loop
-
+let explosionRate = 10; // Adjust this value to control the rate of explosions
 function draw() {
     background(0);
 
-    let spectrum = fft.analyze();
+    if (isSoundPlaying) {
+        let spectrum = fft.analyze();
 
-    // Draw equalizer bars
-    for (let i = 0; i < spectrum.length; i += 10) {
-        let x = map(i, 0, spectrum.length, 0, canvas.width);
-        let h = -canvas.height + map(spectrum[i], 0, 255, canvas.height, 0);
-        rect(x, canvas.height, canvas.width / spectrum.length, h);
-    }
+        // Create explosions for bass frequencies at a controlled rate
+        let bassStart = 0; // Adjust the start index based on your spectrum
+        let bassEnd = 20;  // Adjust the end index based on your spectrum
 
-    // Create explosions for low notes
-    let lowStart = 20;
-    let lowEnd = 120;
+        if (frameCount % explosionRate === 0) {
+            for (let i = bassStart; i < bassEnd; i += 5) {
+                if (random() > 0.8) {
+                    let radius = map(spectrum[i], 0, 255, 10, min(width, height) / 2);
+                    let x = random(width);
+                    let y = random(height);
+                    createExplosion(x, y, radius, spectrum[i]); // Pass the spectrum value
+                }
+            }
+        }
 
-    for (let i = lowStart; i < lowEnd; i += 5) {
-        if (random() > 0.8) { // Adjust the probability as needed
-            let radius = map(spectrum[i], 0, 255, 10, min(canvas.width, canvas.height) / 2);
-            let x = random(canvas.width);
-            let y = random(canvas.height);
-            createExplosion(x, y, radius);
+        // Draw equalizer bars with individual colors
+        for (let i = 0; i < spectrum.length; i += 10) {
+            let x = map(i, 0, spectrum.length, 0, width);
+            let h = -height + map(spectrum[i], 0, 255, height, 0);
+
+            // Interpolate the height for smoother transitions
+            let prevH = i > 0 ? -height + map(spectrum[i - 10], 0, 255, height, 0) : h;
+            h = lerp(prevH, h, 0.2);
+
+            // Set the fill color based on the spectrum value
+            let barColor = color(map(spectrum[i], 0, 255, 0, 360), 80, 90);
+            fill(barColor);
+            rect(x, height, width / spectrum.length, h);
         }
     }
 
@@ -109,23 +119,23 @@ function draw() {
         particle.display();
     }
 }
+function createExplosion(x, y, radius, spectrumValue) {
+    let explosionColor = color(map(spectrumValue, 0, 255, 0, 360), 80, 90);
 
-function createExplosion(x, y, radius) {
-    // Create a burst of particles for the explosion
     for (let i = 0; i < 20; i++) {
         let angle = random(TWO_PI);
-        let particle = new Particle(x, y, cos(angle) * radius, sin(angle) * radius);
+        let particle = new Particle(x, y, cos(angle) * radius, sin(angle) * radius, explosionColor);
         particles.push(particle);
     }
 }
-
 class Particle {
-    constructor(x, y, vx, vy) {
+    constructor(x, y, vx, vy, explosionColor) {
         this.x = x;
         this.y = y;
-        this.vx = vx;
-        this.vy = vy;
+        this.vx = vx * 0.02;
+        this.vy = vy * 0.02;
         this.alpha = 255;
+        this.color = explosionColor; // Set the color based on the explosion
     }
 
     update() {
@@ -133,10 +143,9 @@ class Particle {
         this.y += this.vy;
         this.alpha -= 2;
     }
-
     display() {
         noStroke();
-        fill(255, this.alpha);
+        fill(this.color.levels[0], this.color.levels[1], this.color.levels[2], this.alpha);
         ellipse(this.x, this.y, 5, 5);
     }
 }
