@@ -13,6 +13,11 @@ const VALUE2 = 2;
 // Globals
 let myInstance;
 let canvasContainer;
+let charColors;
+const size = 15;
+let chars = [" ", "-", ".", "~", ":", "=", "+"], // These could be whatever... try something like [" ", "^", "*", ")", "%", "$", "#", "&"], or [" ", "•", "●", "⬤"]
+		data,
+		particles = [];
 
 class MyClass {
     constructor(param1, param2) {
@@ -41,27 +46,67 @@ function setup() {
 
     var centerHorz = windowWidth / 2;
     var centerVert = windowHeight / 2;
+
+    textFont("monospace", size*2);
+	data = new Array(width/size*height/size).fill().map(_ => 0);
+	charColors = {
+		" ": color(0, 0, 0),           // Black color for space
+		"-": color(80, 80, 80),        // Dark gray color for "-"
+		".": color(70, 130, 180),      // Steel Blue color for "."
+		"~": color(0, 128, 0),         // Green color for "~"
+		":": color(0, 0, 128),         // Navy Blue color for ":"
+		"=": color(100, 149, 237),     // Cornflower Blue color for "="
+		"+": color(0, 255, 255),       // Cyan color for "+"
+		// Add more characters and their corresponding colors as needed
+	};
 }
 
 // draw() function is called repeatedly, it's the main animation loop
 function draw() {
-    background(220);    
-    // call a method on the instance
-    myInstance.myMethod();
-
-    // Put drawings here
-    var centerHorz = canvasContainer.width() / 2 - 125;
-    var centerVert = canvasContainer.height() / 2 - 125;
-    fill(234, 31, 81);
-    noStroke();
-    rect(centerHorz, centerVert, 250, 250);
-    fill(255);
-    textStyle(BOLD);
-    textSize(140);
-    text("p5*", centerHorz + 10, centerVert + 200);
+	background(0);
+	const ps = particles.sort((a, b) => a.vel.magSq()-b.vel.magSq());
+	let p;
+	for(let i = 0; i < data.length; i ++){
+		fill(charColors[chars[data[i]]]);
+		text(chars[data[i]], i % (width/size) * size, Math.floor(i / (width/size)) * size);
+		let d = new p5.Vector(i % (width/size) * size, Math.floor(i / (width/size)) * size);
+		p = ps.filter(z => z.pos.dist(d) < 100); // Not ideal, but performance-wise it is a must
+		data[i] = 0
+		if(!p.length) continue;
+		for(let part of p){
+			ds = part.pos.dist(d)/5;
+			data[i] += Math.round((chars.length-1)/(ds < 1 ? 1 : ds));
+		}
+		if(data[i] > chars.length-1) data[i] = chars.length-1
+	}
+	
+	for(let p of particles) {
+		p.pos.add(p.vel);
+		p.vel.rotate(noise(p.pos.x/100, p.pos.y/100)-0.5);
+		if(p.pos.x < -20) p.pos.x = width+20
+		if(p.pos.x > width+20) p.pos.x = -20
+		if(p.pos.y < -20) p.pos.y = height+20
+		if(p.pos.y > height+20) p.pos.y = -20
+	}
 }
 
-// mousePressed() function is called once after every time a mouse button is pressed
-function mousePressed() {
-    // code to run when mouse is pressed
+function mouseDragged(){
+	if(new p5.Vector(mouseX-pmouseX, mouseY-pmouseY).mag() > 5) particles.push({pos: new p5.Vector(mouseX, mouseY), vel: new p5.Vector(mouseX-pmouseX, mouseY-pmouseY).div(4)})
+}
+function resetSketch() {
+    particles = [];
+    // Add any additional reset logic here
+}
+
+function explode() {
+    const explosionCenter = createVector(width / 2, height / 2);
+    const numParticles = 200;
+
+    for (let i = 0; i < numParticles; i++) {
+        const angle = random(TWO_PI);
+        const speed = random(2, 5);
+        const vel = createVector(cos(angle) * speed, sin(angle) * speed);
+        const pos = explosionCenter.copy();
+        particles.push({ pos, vel });
+    }
 }
