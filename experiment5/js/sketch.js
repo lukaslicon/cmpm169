@@ -48,7 +48,7 @@ function setup() {
     var centerVert = windowHeight / 2;
 
     textFont("monospace", size*2);
-	data = new Array(width/size*height/size).fill().map(_ => 0);
+	data = new Array(canvasContainer.width()/size* canvasContainer.height()/size).fill().map(_ => 0);
 	charColors = {
 		" ": color(0, 0, 0),           // Black color for space
 		"-": color(80, 80, 80),        // Dark gray color for "-"
