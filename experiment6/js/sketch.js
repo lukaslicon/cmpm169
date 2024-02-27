@@ -1,4 +1,4 @@
-// sketch.js - purpose and description here
+
 // Author: Your Name
 // Date:
 
@@ -24,7 +24,14 @@ class MyClass {
         // code to run when method is called
     }
 }
+let gamesData;
+let currentDisplayCount = 100;
 
+function preload() {
+    // Load the CSV file
+    gamesData = loadTable('data/IGN.csv', 'csv', 'header');
+  }
+  
 // setup() function is called once when the program starts
 function setup() {
     // place our canvas, making it fit our container
@@ -38,30 +45,62 @@ function setup() {
     });
     // create an instance of the class
     myInstance = new MyClass(VALUE1, VALUE2);
+    console.log("Number of rows in CSV:", gamesData.getRowCount());
 
-    var centerHorz = windowWidth / 2;
-    var centerVert = windowHeight / 2;
+    // Call the displayTopGames function with the initial count
+    displayTopGames(currentDisplayCount);
 }
 
-// draw() function is called repeatedly, it's the main animation loop
-function draw() {
-    background(220);    
-    // call a method on the instance
-    myInstance.myMethod();
+function displayTopGames(count) {
+    // Display the top N games based on user input
+    clear();
+    textSize(14);
+    textAlign(LEFT);
 
-    // Put drawings here
-    var centerHorz = canvasContainer.width() / 2 - 125;
-    var centerVert = canvasContainer.height() / 2 - 125;
-    fill(234, 31, 81);
-    noStroke();
-    rect(centerHorz, centerVert, 250, 250);
-    fill(255);
-    textStyle(BOLD);
-    textSize(140);
-    text("p5*", centerHorz + 10, centerVert + 200);
+    for (let i = 0; i < count && i < gamesData.getRowCount(); i++) {
+        const name = gamesData.getString(i, 'title');
+        const score = gamesData.getNum(i, 'score');
+        if (name !== null && !isNaN(score)) {
+            const yPos = i * 20 + 30;
+            text(`${name}: ${score}`, 20, yPos);
+        }
+    }
 }
 
-// mousePressed() function is called once after every time a mouse button is pressed
-function mousePressed() {
-    // code to run when mouse is pressed
+function displayRandomGames(count) {
+    // Display a random selection of N games
+    clear();
+    textSize(14);
+    textAlign(LEFT);
+
+    for (let i = 0; i < count; i++) {
+        const randomIndex = floor(random(gamesData.getRowCount()));
+        const name = gamesData.getString(randomIndex, 'title');
+        const score = gamesData.getNum(randomIndex, 'score');
+        if (name !== null && !isNaN(score)) {
+            const yPos = i * 20 + 30;
+            text(`${name}: ${score}`, 20, yPos);
+        }
+    }
+}
+
+
+function displayTop100() {
+    displayTopGames(100);
+}
+
+function displayTop200() {
+    displayTopGames(200);
+}
+
+function displayTop300() {
+    displayTopGames(300);
+}
+
+function displayRandom100() {
+    displayRandomGames(100);
+}
+
+function displayRandom200() {
+    displayRandomGames(200);
 }
