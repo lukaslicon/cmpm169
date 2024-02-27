@@ -54,15 +54,14 @@ function setup() {
 
 
 function displayRandomHeatmap(count) {
-    currentDisplayCount = count; // Update the global variable
+    currentDisplayCount = count;
     clear();
 
-    // Adjust cell size based on canvas size and data dimensions
     let cellWidth = width / cols;
     let cellHeight = height / rows;
 
-    textSize(12); // Set the font size for the score
-    const titleFontSize = 10; // Set the font size for the title
+    textSize(12); 
+    const titleFontSize = 10; 
 
     for (let i = 0; i < currentDisplayCount; i++) {
         const randomIndex = floor(random(gamesData.getRowCount()));
