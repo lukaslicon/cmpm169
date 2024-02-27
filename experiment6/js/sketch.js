@@ -1,18 +1,16 @@
-
-// Author: Your Name
-// Date:
-
-// Here is how you might set up an OOP p5.js project
-// Note that p5.js looks for a file called sketch.js
-
 // Constants - User-servicable parts
-// In a longer project I like to put these in a separate file
 const VALUE1 = 1;
 const VALUE2 = 2;
 
 // Globals
 let myInstance;
 let canvasContainer;
+let gamesData;
+let currentDisplayCount = 100;
+let colorScale;
+
+// Number of rows and columns in the heatmap grid
+let rows, cols;
 
 class MyClass {
     constructor(param1, param2) {
@@ -24,83 +22,92 @@ class MyClass {
         // code to run when method is called
     }
 }
-let gamesData;
-let currentDisplayCount = 100;
 
-function preload() {
-    // Load the CSV file
-    gamesData = loadTable('data/IGN.csv', 'csv', 'header');
-  }
-  
 // setup() function is called once when the program starts
 function setup() {
     // place our canvas, making it fit our container
     canvasContainer = $("#canvas-container");
     let canvas = createCanvas(canvasContainer.width(), canvasContainer.height());
     canvas.parent("canvas-container");
-    // resize canvas is the page is resized
-    $(window).resize(function() {
+    // resize canvas if the page is resized
+    $(window).resize(function () {
         console.log("Resizing...");
         resizeCanvas(canvasContainer.width(), canvasContainer.height());
+        displayRandomHeatmap(currentDisplayCount);
     });
+
     // create an instance of the class
     myInstance = new MyClass(VALUE1, VALUE2);
     console.log("Number of rows in CSV:", gamesData.getRowCount());
 
-    // Call the displayTopGames function with the initial count
-    displayTopGames(currentDisplayCount);
+    // Initialize colorScale here
+    colorScale = chroma.scale(['#edf8b1', '#2c7fb8']).mode('lab').colors(10); // You can adjust the color scale
+    console.log("Color Scale:", colorScale); // Log colorScale to check if it's defined correctly
+
+    // Set rows and cols based on the currentDisplayCount
+    rows = Math.ceil(currentDisplayCount / 10); // You can customize the division factor
+    cols = 10; // You can customize the number of columns
+
+    // Call the displayHeatmap function
+    displayRandomHeatmap(currentDisplayCount);
 }
 
-function displayTopGames(count) {
-    // Display the top N games based on user input
+
+function displayRandomHeatmap(count) {
+    currentDisplayCount = count; // Update the global variable
     clear();
-    textSize(14);
-    textAlign(LEFT);
 
-    for (let i = 0; i < count && i < gamesData.getRowCount(); i++) {
-        const name = gamesData.getString(i, 'title');
-        const score = gamesData.getNum(i, 'score');
-        if (name !== null && !isNaN(score)) {
-            const yPos = i * 20 + 30;
-            text(`${name}: ${score}`, 20, yPos);
-        }
-    }
-}
+    // Adjust cell size based on canvas size and data dimensions
+    let cellWidth = width / cols;
+    let cellHeight = height / rows;
 
-function displayRandomGames(count) {
-    // Display a random selection of N games
-    clear();
-    textSize(14);
-    textAlign(LEFT);
+    textSize(12); // Set the font size for the score
+    const titleFontSize = 10; // Set the font size for the title
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < currentDisplayCount; i++) {
         const randomIndex = floor(random(gamesData.getRowCount()));
-        const name = gamesData.getString(randomIndex, 'title');
+        const title = gamesData.getString(randomIndex, 'title');
         const score = gamesData.getNum(randomIndex, 'score');
-        if (name !== null && !isNaN(score)) {
-            const yPos = i * 20 + 30;
-            text(`${name}: ${score}`, 20, yPos);
+
+        if (!isNaN(score)) {
+            const row = floor(i / cols);
+            const col = i % cols;
+
+            const xPos = col * cellWidth;
+            const yPos = row * cellHeight;
+            const rectWidth = cellWidth;
+            const rectHeight = cellHeight;
+
+            const hue = map(score, 0, 10, 0, 360);
+            const saturation = 100; // You can adjust the saturation if needed
+            const lightness = 50; // You can adjust the lightness if needed
+
+            const fillColor = chroma.hsl(hue, saturation, lightness).hex();
+
+            // Draw the heatmap rectangle
+            noStroke();
+            fill(fillColor);
+            rect(xPos, yPos, rectWidth, rectHeight);
+
+            // Display title and score in the middle of the square
+            fill(0); // Set text color to black
+            textAlign(CENTER, CENTER);
+
+            textSize(titleFontSize);
+            text(title, xPos + rectWidth / 2, yPos + rectHeight / 2 - 10); // Display title above the score
+
+            textSize(12); // Reset text size for the score
+            text(score.toFixed(2), xPos + rectWidth / 2, yPos + rectHeight / 2 + 10); // Display score below the title
         }
     }
 }
 
-
-function displayTop100() {
-    displayTopGames(100);
-}
-
-function displayTop200() {
-    displayTopGames(200);
-}
-
-function displayTop300() {
-    displayTopGames(300);
-}
 
 function displayRandom100() {
-    displayRandomGames(100);
+    displayRandomHeatmap(100);
 }
 
-function displayRandom200() {
-    displayRandomGames(200);
+function preload() {
+    // Load the CSV file
+    gamesData = loadTable('data/IGN.csv', 'csv', 'header');
 }
