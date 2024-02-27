@@ -79,25 +79,23 @@ function displayRandomHeatmap(count) {
             const rectHeight = cellHeight;
 
             const hue = map(score, 0, 10, 0, 360);
-            const saturation = 100; // You can adjust the saturation if needed
-            const lightness = 50; // You can adjust the lightness if needed
+            const saturation = 100;
+            const lightness = 50; 
 
             const fillColor = chroma.hsl(hue, saturation, lightness).hex();
 
-            // Draw the heatmap rectangle
             noStroke();
             fill(fillColor);
             rect(xPos, yPos, rectWidth, rectHeight);
 
-            // Display title and score in the middle of the square
-            fill(0); // Set text color to black
+            fill(0); 
             textAlign(CENTER, CENTER);
 
             textSize(titleFontSize);
-            text(title, xPos + rectWidth / 2, yPos + rectHeight / 2 - 10); // Display title above the score
+            text(title, xPos + rectWidth / 2, yPos + rectHeight / 2 - 10); 
 
-            textSize(12); // Reset text size for the score
-            text(score.toFixed(2), xPos + rectWidth / 2, yPos + rectHeight / 2 + 10); // Display score below the title
+            textSize(12); 
+            text(score.toFixed(2), xPos + rectWidth / 2, yPos + rectHeight / 2 + 10); 
         }
     }
 }
