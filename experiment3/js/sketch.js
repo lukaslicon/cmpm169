@@ -7,26 +7,13 @@
 
 // Constants - User-servicable parts
 // In a longer project I like to put these in a separate file
-const VALUE1 = 1;
-const VALUE2 = 2;
 
-// Globals
-let myInstance;
 let canvasContainer;
 let sound;
 let isSoundPlaying = false;
 let particles = [];
 
-class MyClass {
-    constructor(param1, param2) {
-        this.property1 = param1;
-        this.property2 = param2;
-    }
 
-    myMethod() {
-        // code to run when method is called
-    }
-}
 function preload() {
     sound = loadSound('../music/Teddy-Swims-Lose-Control.mp3'); // Update path to your sound file
 }
@@ -70,10 +57,7 @@ function setup() {
         console.log("Resizing...");
         resizeCanvas(canvasContainer.width(), canvasContainer.height());
     });
-    // create an instance of the class
-    myInstance = new MyClass(VALUE1, VALUE2);
     fft = new p5.FFT();
-
 }
 let explosionRate = 10; // Adjust this value to control the rate of explosions
 function draw() {
