@@ -34,9 +34,17 @@ class MyClass {
 function setup() {
     // place our canvas, making it fit our container
     canvasContainer = $("#canvas-container");
-    let canvas = createCanvas(canvasContainer.width(), canvasContainer.height());
+    let canvasWidth = canvasContainer.width();
+    let canvasHeight = canvasContainer.height();
+    
+    if (canvasWidth <= 0 || canvasHeight <= 0) {
+        console.error("Invalid canvas dimensions.");
+        return;
+    }
+    
+    let canvas = createCanvas(canvasWidth, canvasHeight);
     canvas.parent("canvas-container");
-    // resize canvas is the page is resized
+    // resize canvas if the page is resized
     $(window).resize(function() {
         console.log("Resizing...");
         resizeCanvas(canvasContainer.width(), canvasContainer.height());
@@ -47,18 +55,19 @@ function setup() {
     var centerHorz = windowWidth / 2;
     var centerVert = windowHeight / 2;
 
-    textFont("monospace", size*2);
-	data = new Array(canvasContainer.width()/size* canvasContainer.height()/size).fill().map(_ => 0);
-	charColors = {
-		" ": color(0, 0, 0),           // Black color for space
-		"-": color(80, 80, 80),        // Dark gray color for "-"
-		".": color(70, 130, 180),      // Steel Blue color for "."
-		"~": color(0, 128, 0),         // Green color for "~"
-		":": color(0, 0, 128),         // Navy Blue color for ":"
-		"=": color(100, 149, 237),     // Cornflower Blue color for "="
-		"+": color(0, 255, 255),       // Cyan color for "+"
-		// Add more characters and their corresponding colors as needed
-	};
+    textFont("monospace", size * 2);
+    let arrayLength = Math.floor((canvasWidth / size) * (canvasHeight / size));
+    data = new Array(arrayLength).fill(0);
+    charColors = {
+        " ": color(0, 0, 0),           // Black color for space
+        "-": color(80, 80, 80),        // Dark gray color for "-"
+        ".": color(70, 130, 180),      // Steel Blue color for "."
+        "~": color(0, 128, 0),         // Green color for "~"
+        ":": color(0, 0, 128),         // Navy Blue color for ":"
+        "=": color(100, 149, 237),     // Cornflower Blue color for "="
+        "+": color(0, 255, 255),       // Cyan color for "+"
+        // Add more characters and their corresponding colors as needed
+    };
 }
 
 // draw() function is called repeatedly, it's the main animation loop
